@@ -1,0 +1,9 @@
+data/
+dev/
+.git
+.vscode
+*.code-workspace
+**/__pycache__
+*.egg-info
+*.lprof
+*.pyc

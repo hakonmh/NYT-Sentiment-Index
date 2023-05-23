@@ -1,0 +1,10 @@
+transformers
+torch
+pandas
+numpy
+pynytimes
+
+# Tests
+pytest
+pytest-mock
+pyfakefs
