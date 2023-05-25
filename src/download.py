@@ -62,7 +62,6 @@ def nyt_download_latest(output_folder=NYT_OUTPUT_PATH):
         The path to the folder where the downloaded files will be saved.
         Default is 'data/raw-nyt-data'.
     """
-    os.makedirs(NYT_OUTPUT_PATH, exist_ok=True)
     last_file = os.listdir(NYT_OUTPUT_PATH)[-1]
 
     start_year = int(last_file[:4])

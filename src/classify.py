@@ -60,7 +60,7 @@ class ClassificationPipeline:
                  'model topic': topics,
                  'sentiment': sentiments}
             )
-            df.index = data.index
+            df.index = dataset.index
             df['headline'] = df['headline'].astype(str)
         return df
 
@@ -132,6 +132,7 @@ class _Model:
         """
         warnings.filterwarnings('ignore')
         predictions = [pred['label'] for pred in self.pipeline(texts)]
+        breakpoint()
         warnings.resetwarnings()
         return predictions
 

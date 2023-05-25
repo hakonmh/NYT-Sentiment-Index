@@ -2,9 +2,10 @@ from datetime import datetime
 import pandas as pd
 from src.download import (
     nyt_download_history,
-    nyt_download_latest_month,
+    nyt_download_latest,
     __get_nyt_headlines,
     __format_headlines,
+    NYT_OUTPUT_PATH
 )
 
 
@@ -28,14 +29,27 @@ def _assert_raw_data_files_exists(fs, start_year=2000):
 
 def test_nyt_download_latest_month(mocker, fs):
     # Arrange
-    year = datetime.now().year
-    month = datetime.now().month
+    expected_files = _create_expected_listdir_content(start_year=2000)
+    fs.create_dir(NYT_OUTPUT_PATH)
     dummy_data = [('2000-01-01', 'headline', 'topic')]
     mocker.patch('src.download.__get_nyt_headlines', return_value=dummy_data)
+    mocker.patch('os.listdir', return_value=['2000-01-01.csv'])
     # Act
-    nyt_download_latest_month()
+    nyt_download_latest()
     # Assert
-    assert fs.exists(f'data/raw-nyt-data/{year}-{month:02d}.csv')
+    assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
+
+
+def _create_expected_listdir_content(start_year=2000):
+    year = datetime.now().year
+    month = datetime.now().month
+    expected_files = []
+    for year in range(start_year, datetime.now().year + 1):
+        for month in range(1, 13):
+            if datetime(year, month, 1) > datetime.now():
+                break
+            expected_files.append(f'{year}-{month:02d}.csv')
+    return expected_files
 
 
 def test_get_nyt_headlines(mocker):

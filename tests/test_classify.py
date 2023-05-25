@@ -8,7 +8,14 @@ def clf(mocker):
     """Returns a ClassificationPipeline object with a mocked Model object"""
     mock_model = mocker.patch('src.classify._Model', autospec=True)
     mock_model_instance = mock_model.return_value
-    mock_model_instance.predict.return_value = [{'label': 'test'}]
+
+    def mocked_predict(texts):
+        if isinstance(texts, str):
+            return ['test']
+        else:
+            return ['test'] * len(texts)
+
+    mock_model_instance.predict.side_effect = mocked_predict
     return ClassificationPipeline('cpu')
 
 
@@ -17,7 +24,7 @@ def test_predict_single_string(clf):
     text = "US economy grows by 6.4% in first quarter"
     expected = pd.DataFrame({
         'headline': [text],
-        'topic': ['test'],
+        'model topic': ['test'],
         'sentiment': ['test']
     })
     # Act
@@ -34,7 +41,7 @@ def test_predict_list_of_strings(clf):
     ]
     expected = pd.DataFrame({
         'headline': texts,
-        'topic': ['test', 'test'],
+        'model topic': ['test', 'test'],
         'sentiment': ['test', 'test']
     })
     # Act
