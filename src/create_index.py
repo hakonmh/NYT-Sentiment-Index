@@ -26,7 +26,8 @@ def create_sentiment_index(
 
     for f in os.listdir(input_folder):
         file_path = os.path.join(input_folder, f)
-        df = convert_file_to_index(file_path)
+        classified_headlines = pd.read_csv(file_path, index_col=0, parse_dates=True)
+        df = convert_headlines_df_to_index(classified_headlines)
         if df is not None:
             df.to_csv(output_path, header=False, mode='a')
 
@@ -61,7 +62,8 @@ def append_sentiment_index(
 
     for f in files_missing_in_index(input_folder, append_start_date):
         file_path = os.path.join(input_folder, f)
-        df = convert_file_to_index(file_path)
+        classified_headlines = pd.read_csv(file_path, index_col=0, parse_dates=True)
+        df = convert_headlines_df_to_index(classified_headlines)
         if df is not None:
             df = df.loc[append_start_date:]
             df['smoothed_index_value'] = 0
@@ -86,7 +88,7 @@ def create_index_file(file_path):
 
 
 def files_missing_in_index(input_folder, append_start_date):
-    """Generate a list of files that are missing in the index starting from a given date.
+    """Return the files that are missing from the index.
 
     Parameters
     ----------
@@ -125,28 +127,25 @@ def _file_to_dtime(file_name):
     return pd.to_datetime(date_str)
 
 
-def convert_file_to_index(file_path):
-    """Convert csv file of classified headlines into an index DataFrame.
+def convert_headlines_df_to_index(classified_headlines):
+    """Convert a DataFrame of classified headlines into an index DataFrame.
 
     Parameters
     ----------
-    file_path : str
-        Path to the CSV file to be converted.
+    classified_headlines : pd.DataFrame
+        DataFrame of headlines with sentiment and topic labels.
 
     Returns
     -------
     DataFrame or None
         Formatted DataFrame if successful, None if an error occurs.
     """
-    df = pd.read_csv(file_path, index_col=0, parse_dates=True)
     try:
-        df = _filter_headlines(df)
-        df = _format_to_index(df)
+        classified_headlines = _filter_headlines(classified_headlines)
+        df = _format_to_index(classified_headlines)
         df = _drop_today_if_in_df(df)  # To avoid writing incomplete data
         return df
-    except AttributeError as e:
-        f = os.path.basename(file_path)
-        print(f'Error in file {f}: {e}')
+    except AttributeError:  # If file is empty
         return None
 
 
