@@ -134,7 +134,6 @@ class _Model:
         """
         warnings.filterwarnings('ignore')
         predictions = [pred['label'] for pred in self.pipeline(texts)]
-        breakpoint()
         warnings.resetwarnings()
         return predictions
 
