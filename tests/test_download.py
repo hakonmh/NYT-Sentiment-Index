@@ -11,36 +11,30 @@ from src.download import (
 
 def test_nyt_download_history(mocker, fs):
     # Arrange
-    dummy_data = [('2000-01-01', 'headline', 'topic')]
+    expected_files = _create_expected_listdir_content(start_year=2022)
+    dummy_data = [('2022-01-01', 'headline', 'topic')]
     mocker.patch('src.download.__get_nyt_headlines', return_value=dummy_data)
     # Act
-    nyt_download_history(start_year=2000)
+    nyt_download_history(start_year=2022)
     # Assert
-    _assert_raw_data_files_exists(fs, start_year=2000)
-
-
-def _assert_raw_data_files_exists(fs, start_year=2000):
-    for year in range(start_year, datetime.now().year + 1):
-        for month in range(1, 13):
-            if datetime(year, month, 1) > datetime.now():
-                break
-            assert fs.exists(f'data/raw-nyt-data/{year}-{month:02d}.csv')
+    assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
 
 
 def test_nyt_download_latest_month(mocker, fs):
     # Arrange
-    expected_files = _create_expected_listdir_content(start_year=2000)
+    expected_files = _create_expected_listdir_content(start_year=2022)
+
     fs.create_dir(NYT_OUTPUT_PATH)
-    dummy_data = [('2000-01-01', 'headline', 'topic')]
+    mocker.patch('os.listdir', return_value=['2022-01-01.csv'])
+    dummy_data = [('2022-01-01', 'headline', 'topic')]
     mocker.patch('src.download.__get_nyt_headlines', return_value=dummy_data)
-    mocker.patch('os.listdir', return_value=['2000-01-01.csv'])
     # Act
     nyt_download_latest()
     # Assert
     assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
 
 
-def _create_expected_listdir_content(start_year=2000):
+def _create_expected_listdir_content(start_year=2022):
     year = datetime.now().year
     month = datetime.now().month
     expected_files = []

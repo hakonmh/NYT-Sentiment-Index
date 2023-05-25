@@ -1,9 +1,11 @@
 import os
+import sys
 import warnings
 import pandas as pd
-import torch
+from torch import cuda, device as _device
 from torch.utils.data import Dataset
-from transformers import pipeline
+if 'pytest' not in sys.modules:
+    from transformers import pipeline
 
 
 class ClassificationPipeline:
@@ -18,9 +20,9 @@ class ClassificationPipeline:
             The device on which to run the models. If not provided, will default to GPU if available, else CPU.
         """
         if device is None:
-            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            device = _device("cuda:0" if cuda.is_available() else "cpu")
         elif isinstance(device, str):
-            device = torch.device(device)
+            device = _device(device)
 
         self.topic_model = _Model(
             "hakonmh/topic-xdistil-uncased",

@@ -16,7 +16,7 @@ def clf(mocker):
             return ['test'] * len(texts)
 
     mock_model_instance.predict.side_effect = mocked_predict
-    return ClassificationPipeline('cpu')
+    return ClassificationPipeline(device='cpu')
 
 
 def test_predict_single_string(clf):
