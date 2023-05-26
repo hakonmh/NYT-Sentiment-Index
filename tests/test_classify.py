@@ -1,7 +1,8 @@
 import pytest
-from src.classify import ClassificationPipeline, classify_latest, classify_full_history
-import pandas as pd
 from .fixtures import _fs_read_file, RAW_DATA_PATH, CLASSIFIED_DATA_PATH
+
+import pandas as pd
+from src.classify import ClassificationPipeline, classify_latest, classify_full_history
 
 FILES = ['2022-01.csv', '2022-02.csv', '2022-03.csv']
 
