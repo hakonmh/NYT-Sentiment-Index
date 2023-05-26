@@ -1,10 +1,10 @@
+import pytest
+
 from datetime import datetime
-import pandas as pd
 from src.download import (
     nyt_download_history,
     nyt_download_latest,
-    __get_nyt_headlines,
-    __format_headlines,
+    _download_nyt_headlines_for_month,
     NYT_OUTPUT_PATH
 )
 
@@ -12,22 +12,65 @@ from src.download import (
 def test_nyt_download_history(mocker, fs):
     # Arrange
     expected_files = _create_expected_listdir_content(start_year=2022)
-    dummy_data = [('2022-01-01', 'headline', 'topic')]
-    mocker.patch('src.download.__get_nyt_headlines', return_value=dummy_data)
+    dummy_articles = _get_dummy_articles(num_rows=1)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
     # Act
     nyt_download_history(start_year=2022)
     # Assert
     assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
 
 
-def test_nyt_download_latest_month(mocker, fs):
+def test_nyt_download_history_content(mocker, fs):
     # Arrange
-    expected_files = _create_expected_listdir_content(start_year=2022)
+    dummy_articles = _get_dummy_articles(num_rows=1)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
+    expected_file_content = _create_expected_file_content(dummy_articles)
+    # Act
+    nyt_download_history(start_year=2022)
+    # Assert
+    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
+
+def test_nyt_download_history_overwrite(mocker, fs):
+    # Arrange
+    old_dummy_articles = _get_dummy_articles(num_rows=1)
+    old_file_content = _create_expected_file_content(old_dummy_articles)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=old_dummy_articles)
+    nyt_download_history(start_year=2022)
+
+    new_dummy_articles = _get_dummy_articles(num_rows=2)
+    expected_file_content = _create_expected_file_content(new_dummy_articles)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=new_dummy_articles)
+    # Act
+    nyt_download_history(start_year=2022, overwrite=True)
+    # Assert
+    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') != old_file_content
+    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+
+
+def test_nyt_download_history_not_overwrite(mocker, fs):
+    # Arrange
+    old_dummy_articles = _get_dummy_articles(num_rows=1)
+    expected_file_content = _create_expected_file_content(old_dummy_articles)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=old_dummy_articles)
+    nyt_download_history(start_year=2022)
+
+    new_dummy_articles = _get_dummy_articles(num_rows=2)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=new_dummy_articles)
+    # Act & Assert
+    with pytest.warns(UserWarning):
+        nyt_download_history(start_year=2022, overwrite=False, warn=True)
+    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+
+
+def test_nyt_download_latest(mocker, fs):
+    # Arrange
     fs.create_dir(NYT_OUTPUT_PATH)
+
+    dummy_articles = _get_dummy_articles(num_rows=1)
+    mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
     mocker.patch('os.listdir', return_value=['2022-01-01.csv'])
-    dummy_data = [('2022-01-01', 'headline', 'topic')]
-    mocker.patch('src.download.__get_nyt_headlines', return_value=dummy_data)
+    expected_files = _create_expected_listdir_content(start_year=2022)
     # Act
     nyt_download_latest()
     # Assert
@@ -46,27 +89,39 @@ def _create_expected_listdir_content(start_year=2022):
     return expected_files
 
 
-def test_get_nyt_headlines(mocker):
+def test_download_nyt_headlines_for_month(mocker, fs):
     # Arrange
-    dummy_articles = [{"pub_date": "2000-01-01",
-                       "headline": {"main": "headline"},
-                       "news_desk": "topic"}]
+    fs.makedirs(NYT_OUTPUT_PATH)
+    dummy_articles = _get_dummy_articles(num_rows=2)
     mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
-    date = datetime(2000, 1, 1)
+    expected_file_content = _create_expected_file_content(dummy_articles)
     # Act
-    data = __get_nyt_headlines(date)
+    _download_nyt_headlines_for_month(month=1, year=2022, output_folder=NYT_OUTPUT_PATH)
     # Assert
-    assert data == [('2000-01-01', 'headline', 'topic')]
+    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
 
-def test_format_headlines():
-    # Arrange
-    data = [('2000-01-01', 'headline', 'topic'), ('2000-01-01', 'headline2', 'topic2')]
-    expected = pd.DataFrame(data, columns=["date", "headline", "topic"])
-    expected = expected.set_index("date")
-    expected.index = pd.DatetimeIndex(expected.index)
-    # Act
-    df = __format_headlines(data)
-    # Assert
-    assert isinstance(df, pd.DataFrame)
-    assert df.equals(expected)
+def _get_dummy_articles(num_rows=1):
+    dummy_articles = []
+    for i in range(1, num_rows + 1):
+        article = {
+            "pub_date": f"2000-01-{i:02d}",
+            "headline": {"main": f"headline{i}"},
+            "news_desk": f"topic{i}"
+        }
+        dummy_articles.append(article)
+    return dummy_articles
+
+
+def _create_expected_file_content(dummy_articles):
+    expected_file_content = 'date,headline,topic\n'
+    for article in dummy_articles:
+        expected_file_content += f"{article['pub_date']},"\
+                                 f"{article['headline']['main']},"\
+                                 f"{article['news_desk']}\n"
+    return expected_file_content
+
+
+def _fs_readfile(file_path):
+    with open(file_path, 'r') as f:
+        return f.read()
