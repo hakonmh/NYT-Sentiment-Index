@@ -1,4 +1,5 @@
 import pytest
+from .fixtures import _fs_read_file
 
 from datetime import datetime
 from src.download import (
@@ -28,7 +29,7 @@ def test_nyt_download_history_content(mocker, fs):
     # Act
     nyt_download_history(start_year=2022)
     # Assert
-    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_history_overwrite(mocker, fs):
@@ -44,8 +45,8 @@ def test_nyt_download_history_overwrite(mocker, fs):
     # Act
     nyt_download_history(start_year=2022, overwrite=True)
     # Assert
-    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') != old_file_content
-    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') != old_file_content
+    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_history_not_overwrite(mocker, fs):
@@ -60,7 +61,7 @@ def test_nyt_download_history_not_overwrite(mocker, fs):
     # Act & Assert
     with pytest.warns(UserWarning):
         nyt_download_history(start_year=2022, overwrite=False, warn=True)
-    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_latest(mocker, fs):
@@ -98,7 +99,7 @@ def test_download_nyt_headlines_for_month(mocker, fs):
     # Act
     _download_nyt_headlines_for_month(month=1, year=2022, output_folder=NYT_OUTPUT_PATH)
     # Assert
-    assert _fs_readfile(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
 
 
 def _get_dummy_articles(num_rows=1):
@@ -120,8 +121,3 @@ def _create_expected_file_content(dummy_articles):
                                  f"{article['headline']['main']},"\
                                  f"{article['news_desk']}\n"
     return expected_file_content
-
-
-def _fs_readfile(file_path):
-    with open(file_path, 'r') as f:
-        return f.read()
