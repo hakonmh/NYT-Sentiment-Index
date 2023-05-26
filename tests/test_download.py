@@ -1,12 +1,11 @@
 import pytest
-from .fixtures import _fs_read_file
+from .fixtures import _fs_read_file, RAW_DATA_PATH
 
 from datetime import datetime
 from src.download import (
     nyt_download_history,
     nyt_download_latest,
-    _download_nyt_headlines_for_month,
-    NYT_OUTPUT_PATH
+    _download_nyt_headlines_for_month
 )
 
 
@@ -18,7 +17,7 @@ def test_nyt_download_history(mocker, fs):
     # Act
     nyt_download_history(start_year=2022)
     # Assert
-    assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
+    assert fs.listdir(RAW_DATA_PATH) == expected_files
 
 
 def test_nyt_download_history_content(mocker, fs):
@@ -29,7 +28,7 @@ def test_nyt_download_history_content(mocker, fs):
     # Act
     nyt_download_history(start_year=2022)
     # Assert
-    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{RAW_DATA_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_history_overwrite(mocker, fs):
@@ -45,8 +44,8 @@ def test_nyt_download_history_overwrite(mocker, fs):
     # Act
     nyt_download_history(start_year=2022, overwrite=True)
     # Assert
-    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') != old_file_content
-    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{RAW_DATA_PATH}/2022-01.csv') != old_file_content
+    assert _fs_read_file(f'{RAW_DATA_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_history_not_overwrite(mocker, fs):
@@ -61,12 +60,12 @@ def test_nyt_download_history_not_overwrite(mocker, fs):
     # Act & Assert
     with pytest.warns(UserWarning):
         nyt_download_history(start_year=2022, overwrite=False, warn=True)
-    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{RAW_DATA_PATH}/2022-01.csv') == expected_file_content
 
 
 def test_nyt_download_latest(mocker, fs):
     # Arrange
-    fs.create_dir(NYT_OUTPUT_PATH)
+    fs.create_dir(RAW_DATA_PATH)
 
     dummy_articles = _get_dummy_articles(num_rows=1)
     mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
@@ -75,7 +74,7 @@ def test_nyt_download_latest(mocker, fs):
     # Act
     nyt_download_latest()
     # Assert
-    assert fs.listdir(NYT_OUTPUT_PATH) == expected_files
+    assert fs.listdir(RAW_DATA_PATH) == expected_files
 
 
 def _create_expected_listdir_content(start_year=2022):
@@ -92,14 +91,14 @@ def _create_expected_listdir_content(start_year=2022):
 
 def test_download_nyt_headlines_for_month(mocker, fs):
     # Arrange
-    fs.makedirs(NYT_OUTPUT_PATH)
+    fs.makedirs(RAW_DATA_PATH)
     dummy_articles = _get_dummy_articles(num_rows=2)
     mocker.patch('pynytimes.NYTAPI.archive_metadata', return_value=dummy_articles)
     expected_file_content = _create_expected_file_content(dummy_articles)
     # Act
-    _download_nyt_headlines_for_month(month=1, year=2022, output_folder=NYT_OUTPUT_PATH)
+    _download_nyt_headlines_for_month(month=1, year=2022, output_folder=RAW_DATA_PATH)
     # Assert
-    assert _fs_read_file(f'{NYT_OUTPUT_PATH}/2022-01.csv') == expected_file_content
+    assert _fs_read_file(f'{RAW_DATA_PATH}/2022-01.csv') == expected_file_content
 
 
 def _get_dummy_articles(num_rows=1):
