@@ -17,7 +17,8 @@ class ClassificationPipeline:
         batch_size : int, optional
             The batch size to use for the models. Default is 64.
         device : str or torch.device, optional
-            The device on which to run the models. If not provided, will default to GPU if available, else CPU.
+            The device on which to run the models. If not provided, will default
+            to GPU if available, else CPU.
         """
         if device is None:
             device = _device("cuda:0" if cuda.is_available() else "cpu")
@@ -103,7 +104,8 @@ class _Model:
         Parameters
         ----------
         model_name : str
-            The name of the model to use. Must be a model from the HuggingFace model hub.
+            The name of the model to use. Must be a model from the HuggingFace
+            model hub.
         batch_size : int, optional
             The batch size to use for the models. Default is 64.
         device : str or torch.device, optional
@@ -232,7 +234,7 @@ def _files_not_classified(input_folder, output_folder):
     Returns
     """
     files = _files_to_classify(input_folder, output_folder, overwrite=False)
-    # Re-classify latest file in case the raw data has been updated since last classification
+    # Re-classify latest file in case raw data has been updated since last round
     latest_classified_file = os.listdir(output_folder)[-1]
     files.insert(0, latest_classified_file)
     return files

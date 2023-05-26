@@ -188,7 +188,9 @@ def _format_to_index(df):
     df.index.name = 'date'
     df = __count_num_labels_per_day(df)
     df['total'] = df.sum(axis=1)
-    df['index_value'] = (df['positive'] - df['negative']) / (df['positive'] + df['negative'])
+    df['index_value'] = (
+        (df['positive'] - df['negative']) / (df['positive'] + df['negative'])
+    )
     df = __resample_to_day(df, index_col='index_value')
     return df
 
@@ -204,8 +206,8 @@ def __count_num_labels_per_day(df):
     Returns
     -------
     DataFrame
-        DataFrame with date as index and counts of negative, neutral, and positive labels
-        as columns.
+        DataFrame with date as index and counts of negative, neutral, and positive
+        labels as columns.
     """
     df = df['sentiment'].groupby(df.index.date).value_counts().unstack()
     df = df.fillna(0)
@@ -220,7 +222,7 @@ def __count_num_labels_per_day(df):
 
 
 def __resample_to_day(df, index_col):
-    """Resample the DataFrame to daily freq and fill missing index values with rolling mean.
+    """Resample df to daily freq and fill missing index values with rolling mean.
 
     Parameters
     ----------
@@ -280,7 +282,8 @@ def add_smoothed_col_to_index_df(index_path):
     """
     index_df = pd.read_csv(index_path, index_col=0, parse_dates=True)
     index_df = index_df[['negative', 'neutral', 'positive', 'total', 'index_value']]
-    index_df['smoothed_index_value'] = __calculate_smoothed_index(index_df['index_value'])
+    smoothed_index = __calculate_smoothed_index(index_df['index_value'])
+    index_df['smoothed_index_value'] = smoothed_index
     index_df.index.name = 'date'
     return index_df
 
