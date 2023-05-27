@@ -4,6 +4,6 @@ authors:
 - family-names: "Holmen"
   given-names: "Håkon Magne"
 title: "New York Times Sentiment Index"
-version: 0.0.1
+version: 0.1.0
 date-released: 2023-05-26
 url: "https://github.com/hakonmh/NYT-Sentiment-Index"
