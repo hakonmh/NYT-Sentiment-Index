@@ -105,6 +105,10 @@ def _download_nyt_headlines_for_month(month, year, output_folder, overwrite=Fals
 
     headlines = __get_nyt_headlines(date)
     df = __format_headlines(headlines)
+    # The API returns articles from random months sometimes, so we need to filter them
+    if df.shape[0] > 0:
+        df = df[(df.index.year == year) & (df.index.month == month)]
+
     df.to_csv(output_path)
 
 
@@ -152,4 +156,5 @@ def __format_headlines(headlines):
     df = df.set_index("date")
     df.index = pd.DatetimeIndex(df.index)
     df.index = df.index.tz_localize(None)
+    df["headline"] = df["headline"].str.replace("\n", " ")
     return df.sort_index()
