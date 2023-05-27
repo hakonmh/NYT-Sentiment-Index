@@ -1,10 +1,4 @@
-transformers
 torch
+transformers
 pandas
-numpy
 pynytimes
-
-# Tests
-pytest
-pytest-mock
-pyfakefs
