@@ -29,14 +29,17 @@ sentiment classifier evaluates each economics article, designating it as either 
 The sentiment score is subsequently computed through a process which involves quantifying the daily
 total of positive and negative headlines and applying the ensuing formula:
 
-\[
-\text{{Sentiment Score}} = \frac{{(\text{{Number of Positives}} - \text{{Number of Negatives}})}}{{(\text{{Number of Positives}} + \text{{Number of Negatives}})}}
-\]​
+```math
+\text{Sentiment} = \frac{N_{pos} - N_{neg}}{N_{pos} + N_{neg}}
+```
 
-The smoothed index, as demonstrated in Figure 1, is an outcome of implementing a 100-day exponential
-moving average, and subsequently detrending it by subtracting a 10-year simple moving average. This
-technique allows for the normalization of any potential fluctuations that could be attributed to
-evolving journalistic behaviors."
+Where $N$ is the number of headlines classified as either *Positive* or *Negative*.
+
+The final index, as demonstrated in Figure 1, is made by smoothing the sentiment score with
+a 100-day exponential moving average, and subsequently detrending it by subtracting a 10-year
+simple moving average. This technique allows for the normalization of any potential
+fluctuations that could be attributed to evolving journalistic behaviors (e.g., the increasing
+prominence of negative news of all forms in the social media era).
 
 ### Models
 
