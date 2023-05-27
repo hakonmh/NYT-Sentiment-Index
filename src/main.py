@@ -16,5 +16,5 @@ def make_latest():
 
 
 if __name__ == "__main__":
-    # make_whole_history()
+    make_whole_history()
     make_latest()

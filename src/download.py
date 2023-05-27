@@ -1,8 +1,9 @@
+import os
+import datetime
+import warnings
+
 import pandas as pd
 from pynytimes import NYTAPI
-import datetime
-import os
-import warnings
 
 NYT_OUTPUT_PATH = 'data/raw-nyt-data'
 NYT_API_KEY = os.environ.get('NYT_API_KEY')
