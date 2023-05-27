@@ -45,8 +45,8 @@ index’s ability to capture sentiment throughout a business cycle.
 ### Models
 
 To classify each headline, two models are employed:
-[Topic-xDistil](https://huggingface.co/hakonmh/topic-xdistil-uncased) and
-[Sentiment-xDistil](https://huggingface.co/hakonmh/sentiment-xdistil-uncased). Both models are fine
+[`Topic-xDistil`](https://huggingface.co/hakonmh/topic-xdistil-uncased) and
+[`Sentiment-xDistil`](https://huggingface.co/hakonmh/sentiment-xdistil-uncased). Both models are fine
 tuned transformers based on
 [`xtremedistil-l12-h384-uncased`](https://huggingface.co/microsoft/xtremedistil-l12-h384-uncased),
 a model originally published by Microsoft. These models were fine-tuned on specifically labelled
@@ -72,7 +72,7 @@ Håkon Magne Holmen. 2023. New York Times Sentiment Index. Version 0.1.0 [Source
 
 ## Running the Code
 
-First, clone the repository and install the required packages:
+Clone the repository and install the required packages:
 
 ```bash
 git clone https://github.com/hakonmh/NYT-Sentiment-Index.git
@@ -80,7 +80,7 @@ cd NYT-Sentiment-Index
 pip install -r requirements.txt
 ```
 
-Then, get an New York Times API-key at [https://developer.nytimes.com/](https://developer.nytimes.com/).
+Get a New York Times API-key at [https://developer.nytimes.com/](https://developer.nytimes.com/).
 You can use the API-key by either setting the `NYT_API_KEY` environment variable or changing the
 `NYT_API_KEY` variable found in `download.py`
 
