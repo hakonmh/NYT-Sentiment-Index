@@ -7,7 +7,7 @@ This repository contains the source code used to create the New York Times Senti
 The New York Times Sentiment Index is a high frequency measure of economic sentiment based
 on classification of economics-related news articles. The index is based on all articles
 published in the New York Times since 1851. The index is updated daily and can be found
-[here](<URL-PLACEHOLDER>).
+[here](<URL-PLACEHOLDER>) (Under construction).
 
 <p align="center">
   <img src="nyt-index.png" alt="The New York Sentiment Index - Historical overview (1900-2023)">
@@ -33,7 +33,7 @@ total of positive and negative headlines and applying the ensuing formula:
 \text{Sentiment} = \frac{N_{pos} - N_{neg}}{N_{pos} + N_{neg}}
 ```
 
-Where $N$ is the number of headlines classified as either *Positive* or *Negative*.
+Where $N$ is the number of *Economic* headlines classified as either *Positive* or *Negative*.
 
 The final index, as demonstrated in Figure 1, is made by smoothing the sentiment score with
 a 100-day exponential moving average, and subsequently detrending it by subtracting a 10-year
