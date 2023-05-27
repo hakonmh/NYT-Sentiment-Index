@@ -39,7 +39,8 @@ The final index, as demonstrated in Figure 1, is made by smoothing the sentiment
 a 100-day exponential moving average, and subsequently detrending it by subtracting a 10-year
 simple moving average. This technique allows for the normalization of any potential
 fluctuations that could be attributed to evolving journalistic behaviors (e.g., the increasing
-prominence of negative news of all forms in the social media era).
+prominence of negative news of all forms in the social media era), without compromising the
+index’s ability to capture sentiment throughout a business cycle.
 
 ### Models
 
