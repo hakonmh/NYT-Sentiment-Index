@@ -2,7 +2,7 @@ import pytest
 from .fixtures import _fs_read_file, RAW_DATA_PATH
 
 from datetime import datetime
-from src.download import (
+from newsindex.download import (
     nyt_download_history,
     nyt_download_latest,
     _download_nyt_headlines_for_month
@@ -105,7 +105,7 @@ def _get_dummy_articles(num_rows=1):
     dummy_articles = []
     for i in range(1, num_rows + 1):
         article = {
-            "pub_date": f"2000-01-{i:02d}",
+            "pub_date": f"2022-01-{i:02d}",
             "headline": {"main": f"headline{i}"},
             "news_desk": f"topic{i}"
         }

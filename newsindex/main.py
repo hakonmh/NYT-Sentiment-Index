@@ -1,6 +1,6 @@
-import download
-import classify
-import create_index
+from newsindex import download
+from newsindex import classify
+from newsindex import create_index
 
 
 def make_whole_history(start_year=1852):

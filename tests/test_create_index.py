@@ -6,7 +6,7 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 
-from src.create_index import *
+from newsindex.create_index import *
 
 EXPECTED_COLUMNS = ['negative', 'neutral', 'positive',
                     'total', 'index_value', 'smoothed_index_value']

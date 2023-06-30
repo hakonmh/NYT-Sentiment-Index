@@ -1,7 +1,7 @@
 from .fixtures import _fs_read_file, RAW_DATA_PATH, CLASSIFIED_DATA_PATH
 
 import pandas as pd
-from src.classify import ClassificationPipeline, classify_latest, classify_full_history
+from newsindex.classify import ClassificationPipeline, classify_latest, classify_full_history
 
 FILES = ['2022-01.csv', '2022-02.csv', '2022-03.csv']
 
@@ -14,9 +14,9 @@ def mock_model_class_and_cuda(mocker):
         else:
             return ['test'] * len(texts)
 
-    mock_model_predict = mocker.patch('src.classify._Model.predict', autospec=True)
+    mock_model_predict = mocker.patch('newsindex.classify._Model.predict', autospec=True)
     mock_model_predict.side_effect = mocked_predict
-    mock_model_init = mocker.patch('src.classify._Model.__init__', autospec=True)
+    mock_model_init = mocker.patch('newsindex.classify._Model.__init__', autospec=True)
     mock_model_init.return_value = None
     mock_cuda_is_available = mocker.patch('torch.cuda.is_available', autospec=True)
     mock_cuda_is_available.return_value = False
