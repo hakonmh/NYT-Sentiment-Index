@@ -7,7 +7,7 @@ This repository contains the source code used to create the New York Times Senti
 The New York Times Sentiment Index is a high frequency measure of economic sentiment based
 on classification of economics-related news articles. The index is based on all articles
 published in the New York Times since 1851. The index is updated daily and can be found
-[here](<URL-PLACEHOLDER>) (Under construction).
+[here](https://www.hakholm.com/nyt-sentiment-index) (under construction).
 
 <p align="center">
   <img src="nyt-index.png" alt="The New York Sentiment Index - Historical overview (1900-2023)">
