@@ -49,7 +49,6 @@ term fluctuations that could be attributed to evolving journalistic behaviors (e
 prominence of negative news of all forms in the social media era), without compromising the
 index’s ability to capture sentiment throughout a business cycle (Usually 5-7 years).
 
-
 ### Models
 
 To classify each headline, two models are employed:
