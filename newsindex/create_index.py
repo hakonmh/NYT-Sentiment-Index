@@ -291,7 +291,7 @@ def add_smoothed_col_to_index_df(index_path):
 def __calculate_smoothed_index(index_series):
     """Calculate a smoothed and detrended index value from the given series.
 
-    Uses 100-day EMA as smoothing and 10-year SMA as trend.
+    Uses 100-day EMA as smoothing and 7-year SMA as trend.
 
     Parameters
     ----------
@@ -303,8 +303,8 @@ def __calculate_smoothed_index(index_series):
     Series
         The series with the calculated index values.
     """
-    TEN_YEARS = 365 * 10
+    SEVEN_YEARS = 365 * 7
     smoothed_df = index_series.ewm(span=100).mean()
-    trend_df = index_series.rolling(TEN_YEARS).mean()
+    trend_df = index_series.rolling(SEVEN_YEARS).mean()
     index = smoothed_df - trend_df + 0.5  # Detrended index
     return index
