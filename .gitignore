@@ -1,5 +1,6 @@
 data/
 dev/
+build/
 .git
 .vscode
 *.code-workspace
@@ -7,3 +8,4 @@ dev/
 *.egg-info
 *.lprof
 *.pyc
+*.whl
