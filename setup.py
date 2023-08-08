@@ -5,7 +5,7 @@ current_folder = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='newsindex',
-    version='0.1.1',
+    version='0.1.2',
     description='A daily sentiment index based on New York Times economic news.',
     python_requires='>=3.8',
     packages=find_packages(exclude=['tests', 'data']),
