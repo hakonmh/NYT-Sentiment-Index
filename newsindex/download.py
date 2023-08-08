@@ -63,13 +63,14 @@ def nyt_download_latest(output_folder=NYT_OUTPUT_PATH):
         The path to the folder where the downloaded files will be saved.
         Default is 'data/raw-nyt-data'.
     """
-    last_file = os.listdir(NYT_OUTPUT_PATH)[-1]
+    last_file = sorted(os.listdir(NYT_OUTPUT_PATH))[-1]
 
     start_year = int(last_file[:4])
     start_month = int(last_file[5:7])
 
     end_year = datetime.datetime.now().year
     end_month = datetime.datetime.now().month
+    print(f'Downloading headlines from {start_year}-{start_month:02d} to {end_year}-{end_month:02d}')
 
     for year in range(start_year, end_year + 1):
         start_month = 1 if year > start_year else start_month
