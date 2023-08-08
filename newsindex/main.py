@@ -24,5 +24,5 @@ def make_latest():
 
 
 if __name__ == "__main__":
-    make_whole_history(start_year=1852)
-    # make_latest()
+    # make_whole_history(start_year=1852)
+    make_latest()

@@ -192,7 +192,7 @@ def _files_to_classify(input_folder, output_folder, overwrite):
         input_files = os.listdir(input_folder)
         output_files = os.listdir(output_folder)
         files = list(set(input_files) - set(output_files))
-        files = sorted(files)
+    files = sorted(files)
     return [f for f in files if f.endswith(".csv")]
 
 
@@ -236,6 +236,6 @@ def _files_not_classified(input_folder, output_folder):
     """
     files = _files_to_classify(input_folder, output_folder, overwrite=False)
     # Re-classify latest file in case raw data has been updated since last round
-    latest_classified_file = os.listdir(output_folder)[-1]
+    latest_classified_file = sorted(os.listdir(output_folder))[-1]
     files.insert(0, latest_classified_file)
     return files

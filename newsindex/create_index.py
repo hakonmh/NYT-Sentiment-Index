@@ -24,7 +24,7 @@ def create_sentiment_index(
     """
     create_index_file(output_path)
 
-    for f in os.listdir(input_folder):
+    for f in sorted(os.listdir(input_folder)):
         file_path = os.path.join(input_folder, f)
         classified_headlines = pd.read_csv(file_path, index_col=0, parse_dates=True)
         df = convert_headlines_df_to_index(classified_headlines)
@@ -102,7 +102,7 @@ def files_missing_in_index(input_folder, append_start_date):
     list
         List of file names that are missing in the index.
     """
-    files = os.listdir(input_folder)
+    files = sorted(os.listdir(input_folder))
     files = [f for f in files if f.endswith(".csv")]
     month_start = append_start_date.replace(day=1)
     files = [f for f in files if _file_to_dtime(f) >= month_start]

@@ -70,7 +70,6 @@ def nyt_download_latest(output_folder=NYT_OUTPUT_PATH):
 
     end_year = datetime.datetime.now().year
     end_month = datetime.datetime.now().month
-    print(f'Downloading headlines from {start_year}-{start_month:02d} to {end_year}-{end_month:02d}')
 
     for year in range(start_year, end_year + 1):
         start_month = 1 if year > start_year else start_month
