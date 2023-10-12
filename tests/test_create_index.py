@@ -1,4 +1,5 @@
 from .fixtures import CLASSIFIED_DATA_PATH
+import pytest
 
 import re
 from datetime import datetime, timedelta
@@ -7,18 +8,22 @@ import pandas as pd
 import numpy as np
 
 from newsindex.create_index import *
+from newsindex.create_index import _read_index_file, _write_index_to_file
 
 EXPECTED_COLUMNS = ['negative', 'neutral', 'positive',
                     'total', 'index_value', 'smoothed_index_value']
 EXPECTED_LOC_ROW = pd.Series([0.0, 0.0, 1.0, 1.0, 1.0, np.nan]).values
 
 
-def test_create_sentiment_index(fs, mocker):
+@pytest.mark.parametrize('file_ext', ['csv', 'feather', 'parquet'])
+def test_create_sentiment_index(fs, mocker, file_ext):
     """Test creating sentiment index."""
     # Arrange
     _setup_fs(fs)
+    index_path = 'data/nyt-index.' + file_ext
     # Act
-    result_df = create_sentiment_index()
+    create_sentiment_index(output_path=index_path)
+    result_df = _read_index_file(index_path)
     row = result_df.loc['2022-02-07'].values
     # Assert
     assert result_df.columns.tolist() == EXPECTED_COLUMNS
@@ -27,13 +32,16 @@ def test_create_sentiment_index(fs, mocker):
     assert result_df.shape == (18, 6)
 
 
-def test_append_sentiment_index(fs, mocker):
+@pytest.mark.parametrize('file_ext', ['csv', 'feather', 'parquet'])
+def test_append_sentiment_index(fs, mocker, file_ext):
     """Test appending new data to sentiment index."""
     # Arrange
     _setup_fs(fs)
-    old_index_df = _write_index_to_be_appended()
+    index_path = 'data/nyt-index.' + file_ext
+    old_index_df = _write_index_to_be_appended(file_ext)
     # Act
-    result_df = append_sentiment_index()
+    append_sentiment_index(output_path=index_path)
+    result_df = _read_index_file(index_path)
     row = result_df.loc['2022-02-07'].values
     # Assert
     assert result_df.loc[old_index_df.index].equals(old_index_df)
@@ -86,7 +94,7 @@ def __create_dates_list(num_rows, month=1):
     return dates
 
 
-def _write_index_to_be_appended():
+def _write_index_to_be_appended(file_ext):
     """Write index to file and return the index as a dataframe"""
     text = """date,negative,neutral,positive,total,index_value,smoothed_index_value
     2022-01-01,0.0,0.0,5.0,5.0,1.000000,NaN
@@ -103,5 +111,7 @@ def _write_index_to_be_appended():
     """
     text = re.sub(r'\s+', '\n', text)
     index_df = pd.read_csv(StringIO(text), index_col=0, parse_dates=True)
-    index_df.to_csv('data/nyt-index.csv')
+
+    output_path = 'data/nyt-index.' + file_ext
+    _write_index_to_file(index_df, output_path)
     return index_df

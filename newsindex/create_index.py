@@ -14,7 +14,7 @@ def create_sentiment_index(
         Path to the folder containing CSV files of classified NYT data, by
         default 'data/classified-nyt-data'.
     output_path : str, optional
-        Path where the output CSV file will be stored, by default
+        Path where the output CSV, Feather, or Parquet file will be stored, by default
         'data/nyt-index.csv'.
 
     Returns
@@ -29,10 +29,10 @@ def create_sentiment_index(
         classified_headlines = pd.read_csv(file_path, index_col=0, parse_dates=True)
         df = convert_headlines_df_to_index(classified_headlines)
         if df is not None:
-            df.to_csv(output_path, header=False, mode='a')
+            _append_index_to_file(df, output_path)
 
     index_df = add_smoothed_col_to_index_df(output_path)
-    index_df.to_csv(output_path)
+    _write_index_to_file(index_df, output_path)
     return index_df
 
 
@@ -48,7 +48,7 @@ def append_sentiment_index(
         Path to the folder containing CSV files of classified NYT data, by
         default 'data/classified-nyt-data'.
     output_path : str, optional
-        Path where the output CSV file will be stored, by default
+        Path where the output CSV, Feather, or Parquet file will be stored, by default
         'data/nyt-index.csv'.
 
     Returns
@@ -56,7 +56,7 @@ def append_sentiment_index(
     pd.DataFrame
         The index as a pandas DataFrame.
     """
-    index_df = pd.read_csv(output_path, index_col=0, parse_dates=True)
+    index_df = _read_index_file(output_path)
     index_df = index_df[['negative', 'neutral', 'positive', 'total', 'index_value']]
     append_start_date = index_df.index[-1] + pd.DateOffset(days=1)
 
@@ -64,14 +64,80 @@ def append_sentiment_index(
         file_path = os.path.join(input_folder, f)
         classified_headlines = pd.read_csv(file_path, index_col=0, parse_dates=True)
         df = convert_headlines_df_to_index(classified_headlines)
-        if df is not None:
+        if isinstance(df, (pd.DataFrame, pd.Series)):
             df = df.loc[append_start_date:]
             df['smoothed_index_value'] = 0
-            df.to_csv(output_path, header=False, mode='a')
+            _append_index_to_file(df, output_path)
 
     index_df = add_smoothed_col_to_index_df(output_path)
-    index_df.to_csv(output_path)
+    _write_index_to_file(index_df, output_path)
     return index_df
+
+
+def _read_index_file(index_path):
+    """Read the index from a CSV, Feather or Parquet file.
+
+    Parameters
+    ----------
+    index_path : str
+        The path to the input file, must end with .csv, .feather, .pq or .parquet.
+
+    Returns
+    -------
+    DataFrame
+        The index as a pandas DataFrame.
+    """
+    if index_path.endswith('.csv'):
+        index_df = pd.read_csv(index_path, index_col=0, parse_dates=True)
+    elif index_path.endswith('.feather'):
+        index_df = pd.read_feather(index_path)
+        index_df = index_df.set_index('date')
+    elif index_path.endswith('.parquet') or index_path.endswith('.pq'):
+        index_df = pd.read_parquet(index_path)
+    else:
+        raise ValueError('Index file must be CSV, Feather or Parquet')
+    index_df.index = pd.DatetimeIndex(index_df.index)
+    return index_df
+
+
+def _write_index_to_file(index_df, output_path):
+    """Write the index DataFrame to a CSV, Feather or Parquet file.
+
+    Parameters
+    ----------
+    index_df : pandas.DataFrame
+        The DataFrame to write to file.
+    output_path : str
+        The path to the output file, must end with .csv, .feather, .pq or .parquet.
+    """
+    if output_path.endswith('.csv'):
+        index_df.to_csv(output_path)
+    elif output_path.endswith('.feather'):
+        index_df = index_df.reset_index()
+        index_df.to_feather(output_path)
+    elif output_path.endswith('.parquet') or output_path.endswith('.pq'):
+        index_df.to_parquet(output_path)
+    else:
+        raise ValueError('Output file must be CSV, Feather or Parquet')
+
+
+def _append_index_to_file(df, output_path):
+    """Append the index DataFrame to a CSV, Feather or Parquet file.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame to append to file.
+    output_path : str
+        The path to the output file, must end with .csv.
+    """
+    if output_path.endswith('.csv'):
+        df.to_csv(output_path, header=False, mode='a')
+    else:
+        old_df = _read_index_file(output_path)
+        if not old_df.empty:
+            df = pd.concat([old_df, df])
+        _write_index_to_file(df, output_path)
 
 
 def create_index_file(file_path):
@@ -80,11 +146,19 @@ def create_index_file(file_path):
     Parameters
     ----------
     file_path : str
-        Path where the output CSV file will be stored.
+        Path where the output file will be stored.
     """
     COLUMN_NAMES = ['date', 'negative', 'neutral', 'positive',
                     'total', 'index_value']
-    pd.DataFrame(columns=COLUMN_NAMES).to_csv(file_path, index=False)
+    df = pd.DataFrame(columns=COLUMN_NAMES)
+    df.set_index('date', inplace=True)
+    if file_path.endswith('.csv'):
+        df.to_csv(file_path, index=False)
+    elif file_path.endswith('.feather'):
+        df = df.reset_index()
+        df.to_feather(file_path)
+    elif file_path.endswith('.parquet') or file_path.endswith('.pq'):
+        df.to_parquet(file_path)
 
 
 def files_missing_in_index(input_folder, append_start_date):
@@ -184,8 +258,6 @@ def _format_to_index(df):
     DataFrame
         The formatted DataFrame.
     """
-
-    df.index.name = 'date'
     df = __count_num_labels_per_day(df)
     df['total'] = df.sum(axis=1)
     df['index_value'] = (
@@ -243,6 +315,7 @@ def __resample_to_day(df, index_col):
     df = df.resample('D').mean()
     df[index_col] = df[index_col].fillna(sma)
     df = df.fillna(0)
+    df.index.name = 'date'
     return df
 
 
@@ -280,7 +353,7 @@ def add_smoothed_col_to_index_df(index_path):
     DataFrame
         DataFrame with an added column of smoothed index values.
     """
-    index_df = pd.read_csv(index_path, index_col=0, parse_dates=True)
+    index_df = _read_index_file(index_path)
     index_df = index_df[['negative', 'neutral', 'positive', 'total', 'index_value']]
     smoothed_index = __calculate_smoothed_index(index_df['index_value'])
     index_df['smoothed_index_value'] = smoothed_index
